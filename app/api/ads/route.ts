@@ -1,0 +1,5 @@
+import {NextResponse} from 'next/server';
+import {getAds,addAd,isAdmin} from '../../../lib/sanity';
+import {demoMode} from '../../../lib/data';
+export async function GET(){return NextResponse.json({items:await getAds(),demo:demoMode})}
+export async function POST(req:Request){if(!isAdmin(req))return NextResponse.json({error:'Administrator key required'},{status:401});if(demoMode)return NextResponse.json({error:'Connect Sanity first'},{status:503});const v=await req.json();if(!v.competitorId||!['Meta','Google','LinkedIn'].includes(v.platform)||!v.headline)return NextResponse.json({error:'Competitor, platform and headline required'},{status:400});const now=new Date().toISOString().slice(0,10);return NextResponse.json(await addAd({competitorId:v.competitorId,platform:v.platform,headline:String(v.headline).slice(0,240),body:String(v.body||'').slice(0,2000),cta:String(v.cta||''),format:String(v.format||'Unknown'),landingPage:String(v.landingPage||''),libraryUrl:String(v.libraryUrl||''),firstSeen:now,lastSeen:now,status:'Observed',tag:String(v.tag||'Uncategorized')}))}

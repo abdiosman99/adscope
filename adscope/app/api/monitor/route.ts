@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';
+export async function GET(req:Request){if(!process.env.CRON_SECRET||req.headers.get('authorization')!==`Bearer ${process.env.CRON_SECRET}`)return NextResponse.json({error:'Unauthorized'},{status:401});return NextResponse.json({status:'not_configured',message:'No compliant automated advertising-library data collector is configured. No ads were fetched. Use library links or manual import.'})}

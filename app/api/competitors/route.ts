@@ -1,0 +1,6 @@
+import {NextResponse} from 'next/server';
+import {getCompetitors,addCompetitor,removeCompetitor,isAdmin} from '../../../lib/sanity';
+import {demoMode} from '../../../lib/data';
+export async function GET(){return NextResponse.json({items:await getCompetitors(),demo:demoMode})}
+export async function POST(req:Request){if(!isAdmin(req))return NextResponse.json({error:'Administrator key required'}, {status:401});if(demoMode)return NextResponse.json({error:'Connect SANITY_API_TOKEN to enable persistence'}, {status:503});const v=await req.json();if(!v.name||!v.domain)return NextResponse.json({error:'Name and domain required'}, {status:400});return NextResponse.json(await addCompetitor({name:String(v.name).slice(0,120),domain:String(v.domain).slice(0,200),industry:String(v.industry||'Other').slice(0,80),initials:String(v.name).slice(0,1).toUpperCase(),color:'#5671a6',metaUrl:v.metaUrl||'',googleUrl:v.googleUrl||'',linkedinUrl:v.linkedinUrl||''}))}
+export async function DELETE(req:Request){if(!isAdmin(req))return NextResponse.json({error:'Administrator key required'},{status:401});if(demoMode)return NextResponse.json({error:'Connect Sanity first'},{status:503});const {id}=await req.json();if(!id)return NextResponse.json({error:'ID required'},{status:400});await removeCompetitor(id);return NextResponse.json({ok:true})}
